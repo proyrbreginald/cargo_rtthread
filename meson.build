@@ -1,4 +1,4 @@
-project('pdmcu', 'c', default_options : ['c_std=gnu17'])
+project('pd-embedded', 'c', default_options : ['c_std=gnu17'])
 
 # 进入 src 目录，执行其中的 meson.build
 subdir('src')
@@ -27,9 +27,26 @@ common_link_args = [
     # '-nostartfiles',              # 不使用标准启动文件，使用自己的
 ]
 
-# 声明可执行文件
-executable('pdmcu',
+# 声明可执行文件（EL格式）
+pd_embedded = executable('pd-embedded',
+    name_suffix : 'elf',            # 生成 pd-embedded.elf
     c_args : common_c_args,
     link_args : common_link_args,
-    dependencies : src_dep, # 传递依赖链
+    dependencies : src_dep,         # 传递依赖链
+)
+
+# 自定义目标：将 ELF 转换为 HEX（Intel HEX 格式）
+custom_target('pd-embedded.hex',
+    input : pd_embedded,
+    output : 'pd-embedded.hex',
+    command : ['arm-none-eabi-objcopy', '-O', 'ihex', '@INPUT@', '@OUTPUT@'],
+    build_by_default : false,
+)
+
+# 自定义目标：将 ELF 转换为 BIN（纯二进制格式）
+custom_target('pd-embedded.bin',
+    input : pd_embedded,
+    output : 'pd-embedded.bin',
+    command : ['arm-none-eabi-objcopy', '-O', 'binary', '@INPUT@', '@OUTPUT@'],
+    build_by_default : false,
 )
