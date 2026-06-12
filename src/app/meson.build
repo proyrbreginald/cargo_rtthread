@@ -1,5 +1,6 @@
 # 私有源文件
 _app_src = files(
+    './src/startup.c',
     './src/main.c',
 )
 

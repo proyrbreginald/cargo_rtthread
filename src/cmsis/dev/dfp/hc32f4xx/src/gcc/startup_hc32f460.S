@@ -31,53 +31,16 @@
                 .thumb
 
 /*
-;<h> Stack Configuration
-;  <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
-;</h>
-*/
-                .equ        Stack_Size, 0x00002000
-
-                .section    .stack
-                .align      3
-                .globl      __StackTop
-                .globl      __StackLimit
-__StackLimit:
-                .space      Stack_Size
-                .size       __StackLimit, . - __StackLimit
-__StackTop:
-                .size       __StackTop, . - __StackTop
-
-
-/*
-;<h> Heap Configuration
-;  <o> Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
-;</h>
-*/
-                .equ        Heap_Size, 0x00002000
-
-                .if         Heap_Size != 0                     /* Heap is provided */
-                .section    .heap
-                .align      3
-                .globl      __HeapBase
-                .globl      __HeapLimit
-__HeapBase:
-                .space      Heap_Size
-                .size       __HeapBase, . - __HeapBase
-__HeapLimit:
-                .size       __HeapLimit, . - __HeapLimit
-                .endif
-
-/*
 ;<h> Interrupt vector table start.
 */
-                .section    .vectors, "a", %progbits
+                .section    .reset_vector_table, "a", %progbits
                 .align      2
                 .type       __Vectors, %object
                 .globl      __Vectors
                 .globl      __Vectors_End
                 .globl      __Vectors_Size
 __Vectors:
-                .long       __StackTop                         /*     Top of Stack */
+                .long       _msp_top                         /*     Top of Stack */
                 .long       Reset_Handler                      /*     Reset Handler */
                 .long       NMI_Handler                        /* -14 NMI Handler */
                 .long       HardFault_Handler                  /* -13 Hard Fault Handler */
@@ -244,126 +207,6 @@ __Vectors_End:
                 .size       __Vectors, . - __Vectors
 /*
 ;<h> Interrupt vector table end.
-*/
-
-/*
-;<h> Reset handler start.
-*/
-                .section    .text.Reset_Handler
-                .align      2
-                .weak       Reset_Handler
-                .type       Reset_Handler, %function
-                .globl      Reset_Handler
-Reset_Handler:
-/* Single section scheme.
- *
- * The ranges of copy from/to are specified by following symbols
- *   __etext: LMA of start of the section to copy from. Usually end of text
- *   __data_start__: VMA of start of the section to copy to
- *   __data_end__: VMA of end of the section to copy to
- *
- * All addresses must be aligned to 4 bytes boundary.
- */
-ClrSramSR:
-                ldr         r0, =0x40050810
-                ldr         r1, =0x1F
-                str         r1, [r0]
-
-                /* Copy data from read only memory to RAM. */
-CopyData:
-                ldr         r1, =__etext
-                ldr         r2, =__data_start__
-                ldr         r3, =__data_end__
-CopyLoop:
-                cmp         r2, r3
-                ittt        lt
-                ldrlt       r0, [r1], #4
-                strlt       r0, [r2], #4
-                blt         CopyLoop
-
-CopyData1:
-                ldr         r1, =__etext_ret_ram
-                ldr         r2, =__data_start_ret_ram__
-                ldr         r3, =__data_end_ret_ram__
-CopyLoop1:
-                cmp         r2, r3
-                ittt        lt
-                ldrlt       r0, [r1], #4
-                strlt       r0, [r2], #4
-                blt         CopyLoop1
-
-/* This part of work usually is done in C library startup code.
- * Otherwise, define this macro to enable it in this startup.
- *
- * There are two schemes too.
- * One can clear multiple BSS sections. Another can only clear one section.
- * The former is more size expensive than the latter.
- *
- * Define macro __STARTUP_CLEAR_BSS_MULTIPLE to choose the former.
- * Otherwise define macro __STARTUP_CLEAR_BSS to choose the later.
- */
-/* Single BSS section scheme.
- *
- * The BSS section is specified by following symbols
- *   __bss_start__: start of the BSS section.
- *   __bss_end__: end of the BSS section.
- *
- * Both addresses must be aligned to 4 bytes boundary.
- */
-                /* Clear BSS section. */
-ClearBss:
-                ldr         r1, =__bss_start__
-                ldr         r2, =__bss_end__
-
-                movs        r0, 0
-ClearLoop:
-                cmp         r1, r2
-                itt         lt
-                strlt       r0, [r1], #4
-                blt         ClearLoop
-
-ClearBss1:
-                ldr         r1, =__bss_start_ret_ram__
-                ldr         r2, =__bss_end_ret_ram__
-
-                movs        r0, 0
-ClearLoop1:
-                cmp         r1, r2
-                itt         lt
-                strlt       r0, [r1], #4
-                blt         ClearLoop1
-
-SetSRAM3Wait:
-                ldr         r0, =0x40050804
-                mov         r1, #0x77
-                str         r1, [r0]
-
-                ldr         r0, =0x4005080C
-                mov         r1, #0x77
-                str         r1, [r0]
-
-                ldr         r0, =0x40050800
-                mov         r1, #0x1100
-                str         r1, [r0]
-
-                ldr         r0, =0x40050804
-                mov         r1, #0x76
-                str         r1, [r0]
-
-                ldr         r0, =0x4005080C
-                mov         r1, #0x76
-                str         r1, [r0]
-
-                /* Call static constructors */
-                bl          __libc_init_array
-                /* Call the clock system initialization function. */
-                bl          SystemInit
-                /* Call the application's entry point. */
-                bl          main
-                bx          lr
-                .size       Reset_Handler, . - Reset_Handler
-/*
-;<h> Reset handler end.
 */
 
 /*

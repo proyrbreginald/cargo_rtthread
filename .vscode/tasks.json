@@ -96,14 +96,14 @@
         {
             "label": "Auto",
             "type": "shell",
-            "dependsOn": ["Build", "Flash"],
+            "dependsOn": ["Clean", "Setup", "Build", "Flash"],
             "dependsOrder": "sequence",
             "group": "build",
             "presentation": { "reveal": "always" },
             "options": {
               "statusbar": {
                 "label": "$(zap) Auto",
-                "detail" : "编译 + 烧录"
+                "detail" : "清理 + 配置 + 编译 + 烧录"
               }
             }
         },

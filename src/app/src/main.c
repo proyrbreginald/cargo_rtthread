@@ -1,4 +1,7 @@
-#include "main.h"
+#include <hc32_ll.h>
+#include <main.h>
+#include <rtt.h>
+
 
 /* LED Port/Pin definition */
 #define LED_G_PORT (GPIO_PORT_C)
@@ -23,17 +26,15 @@ static void LED_Init(void)
  * @param  None
  * @retval int32_t return value, if needed
  */
-int32_t main(void)
+int main(void)
 {
-        /* Register write enable for some required peripherals. */
-        LL_PERIPH_WE(LL_PERIPH_GPIO);
         /* LED initialize */
         LED_Init();
-        /* Register write protected for some required peripherals. */
-        LL_PERIPH_WP(LL_PERIPH_GPIO);
+
         for (;;)
         {
                 GPIO_TogglePins(LED_G_PORT, LED_G_PIN);
                 DDL_DelayMS(1000u);
+                rtt_write("test\n", 5);
         }
 }

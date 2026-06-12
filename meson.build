@@ -24,7 +24,7 @@ common_link_args = [
     '-Wl,--gc-sections',            # 删除未使用的段
     '-Wl,-Map=output.map',          # 生成内存映射文件（相对 build 目录）
     '-Wl,--no-warn-rwx-segments',   # 裸机系统忽略 RWX 段警告（Cortex-M 无 MMU 强制执行）
-    # '-nostartfiles',              # 不使用标准启动文件，使用自己的
+    '-nostartfiles',              # 不使用标准启动文件，使用自己的
 ]
 
 # 声明可执行文件（EL格式）

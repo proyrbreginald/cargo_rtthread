@@ -226,6 +226,7 @@ void SRAM_SetWaitCycle(uint32_t u32SramSel, uint32_t u32WriteCycle, uint32_t u32
  */
 void SRAM_SetEccMode(uint32_t u32EccSram, uint32_t u32EccMode)
 {
+    (void)u32EccSram;
 
     DDL_ASSERT(IS_SRAM_ECC_SRAM(u32EccSram));
     DDL_ASSERT(IS_SRAM_ECC_MD(u32EccMode));

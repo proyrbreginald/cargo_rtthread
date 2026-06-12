@@ -407,6 +407,7 @@ static int32_t UART_CalculateBrr(const CM_USART_TypeDef *USARTx, stc_usart_brr_t
  */
 static int32_t ClockSync_CalculateBrr(const CM_USART_TypeDef *USARTx, stc_usart_brr_t *pstcClockSyncBrr)
 {
+    (void)USARTx;
     uint32_t B;
     uint32_t C;
     uint64_t u64Temp;
